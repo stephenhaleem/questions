@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multi-Step Questionnaire</title>
+
+ 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+    input {
+      width: 300px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 id="question"></h2>
+
+  <input
+    type="text"
+    id="answer"
+    placeholder="Type your answer here"
+    autofocus
+  />
+
+  <br />
+  <button id="nextBtn">Next</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
