@@ -1,33 +1,69 @@
-// 🔹 Supabase config
+
+// Supabase config 
 const SUPABASE_URL = "https://pvtnnavvbnbwaslojmas.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dG5uYXZ2Ym5id2FzbG9qbWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwODY2MzcsImV4cCI6MjA4NDY2MjYzN30.o4YSI6nx4ECI8CqTcX__94IzIL2d8tI4GsGjCtsfuTQ";
+
 
 const client = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-// 🔹 Generate a session ID for this user
+// create Session ID since there is no user auth for this simple app
 const sessionId = crypto.randomUUID();
 
-// 🔹 Questions
+//  Questions, add the questions mr sam gave you
 const questions = [
   "What is your name?",
   "What is your favorite programming language?",
   "Why do you want to learn web development?"
 ];
 
+// Tracks which question we are on ,Starts at 0 because arrays are 0-indexed
 let currentIndex = 0;
 
-// 🔹 DOM elements
+//  DOM elements
 const questionEl = document.getElementById("question");
 const answerEl = document.getElementById("answer");
 const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
+const progressBar = document.getElementById("progressBar");
 
-// Show first question
+// ================================
+// Helper functions
+// ================================
+
+function updateProgress() {
+  const progress = ((currentIndex + 1) / questions.length) * 100;
+  progressBar.style.width = progress + "%";
+}
+
+function animateQuestionChange(newText) {
+  questionEl.classList.add("fade-out");
+
+  setTimeout(() => {
+    questionEl.textContent = newText;
+    questionEl.classList.remove("fade-out");
+    questionEl.classList.add("fade-in");
+
+    setTimeout(() => {
+      questionEl.classList.remove("fade-in");
+    }, 300);
+  }, 300);
+}
+
+// ================================
+// Initial state
+// ================================
+
 questionEl.textContent = questions[currentIndex];
+updateProgress();
+backBtn.disabled = true;
 
-// 🔹 Handle Next button
+// ================================
+// NEXT BUTTON
+// ================================
+
 nextBtn.addEventListener("click", async () => {
   const answer = answerEl.value.trim();
 
@@ -36,10 +72,9 @@ nextBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Disable button while saving
   nextBtn.disabled = true;
 
-  // 🔹 Save answer immediately
+  // Save answer to Supabase
   const { error } = await client
     .from("responses")
     .insert([
@@ -56,19 +91,39 @@ nextBtn.addEventListener("click", async () => {
     nextBtn.disabled = false;
     return;
   }
-
-  // Move to next question
+// Clear input and move to next question
   answerEl.value = "";
   currentIndex++;
 
   if (currentIndex < questions.length) {
-    questionEl.textContent = questions[currentIndex];
-    answerEl.focus();
+    animateQuestionChange(questions[currentIndex]);
+    updateProgress();
+    backBtn.disabled = false;
     nextBtn.disabled = false;
+    answerEl.focus();
   } else {
     document.body.innerHTML = `
-      <h2>All done!</h2>
+      <h2>All done! 🎉</h2>
       <p>Thanks for completing the questionnaire.</p>
     `;
+  }
+});
+
+// ================================
+// BACK BUTTON
+// ================================
+
+backBtn.addEventListener("click", () => {
+  if (currentIndex === 0) return;
+
+  currentIndex--;
+  animateQuestionChange(questions[currentIndex]);
+  updateProgress();
+
+  answerEl.value = "";
+  answerEl.focus();
+
+  if (currentIndex === 0) {
+    backBtn.disabled = true;
   }
 });
