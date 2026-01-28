@@ -2,541 +2,270 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
   <title>Multi-Step Questionnaire</title>
 
- 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-  * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Oxygen", "Ubuntu", sans-serif;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #020617 100%);
-  background-attachment: fixed;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #e5e7eb;
-  padding: 20px;
-  gap: 20px;
-  position: relative;
-  overflow-x: hidden;
-  touch-action: pan-y;
-  -webkit-user-select: none;
-  user-select: none;
-}
+    body {
+      min-height: 100svh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #020617 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e5e7eb;
+      padding: 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-/* Animated background effect */
-body::before {
-  content: '';
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
-  animation: pulse 8s ease-in-out infinite;
-  pointer-events: none;
-}
+    body::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(
+        circle at center,
+        rgba(56, 189, 248, 0.1),
+        transparent 55%
+      );
+      animation: pulse 8s ease-in-out infinite;
+      pointer-events: none;
+    }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.1); opacity: 0.5; }
-}
+    @keyframes pulse {
+      0%,100% { opacity: .3; }
+      50% { opacity: .55; }
+    }
 
-/* Progress bar container */
-.progress {
-  width: 100%;
-  max-width: 500px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  position: relative;
-  z-index: 1;
-}
+    .app {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1;
+    }
 
-/* Actual progress */
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9, #06b6d4);
-  background-size: 200% 100%;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: shimmer 2s infinite;
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-}
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg,#38bdf8,#0ea5e9,#06b6d4);
+      transition: width .4s ease;
+    }
 
-/* Question */
-#question {
-  max-width: 500px;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: 32px 28px;
-  border-radius: 20px;
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 600;
-  line-height: 1.5;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 1;
-}
+    #question {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(20px);
+      padding: 24px 20px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.45;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      transition: transform .35s ease, opacity .35s ease;
+    }
 
-/* Animation states */
-.fade-out {
-  opacity: 0;
-  transform: translateY(-15px) scale(0.98);
-}
+    /* SLIDE ANIMATIONS */
+    .slide-out {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
 
-.fade-in {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
+    .slide-in {
+      opacity: 1;
+      transform: translateX(0);
+    }
 
-/* Input */
-input {
-  max-width: 500px;
-  width: 100%;
-  padding: 16px 20px;
-  font-size: 17px;
-  border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #fff;
-  outline: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  position: relative;
-  z-index: 1;
-  font-family: inherit;
-  -webkit-user-select: text;
-  user-select: text;
-}
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      outline: none;
+    }
 
-input::placeholder {
-  color: #94a3b8;
-}
+    input::placeholder {
+      color: #94a3b8;
+    }
 
-input:focus {
-  border-color: #38bdf8;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 0 0 4px rgba(56, 189, 248, 0.2),
-    0 8px 25px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
-}
+    input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56,189,248,.25);
+    }
 
-/* Button Container */
-.button-container {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  max-width: 500px;
-}
+    /* SHAKE */
+    .shake {
+      animation: shake .4s;
+      border-color: #ef4444 !important;
+    }
 
-/* Buttons */
-button {
-  flex: 1;
-  padding: 16px 24px;
-  font-size: 17px;
-  font-weight: 600;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 1;
-  font-family: inherit;
-  letter-spacing: 0.3px;
-}
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+    }
 
-#nextBtn {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-  color: #020617;
-  box-shadow: 
-    0 4px 15px rgba(14, 165, 233, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-}
+    .button-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
 
-#nextBtn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 
-    0 12px 30px rgba(14, 165, 233, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-}
+    button {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
 
-#nextBtn:active:not(:disabled) {
-  transform: translateY(-1px);
-}
+    #nextBtn {
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9);
+      color: #020617;
+    }
 
-#backBtn {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e5e7eb;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
+    #backBtn {
+      background: rgba(255,255,255,.08);
+      color: #e5e7eb;
+      border: 2px solid rgba(255,255,255,.15);
+    }
 
-#backBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-}
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
 
-#backBtn:active:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-/* Completion message styling */
-body.completed {
-  text-align: center;
-  gap: 16px;
-}
-
-body.completed h2 {
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 12px;
-}
-
-body.completed p {
-  font-size: 1.2rem;
-  color: #cbd5e1;
-  opacity: 0.9;
-}
-
-/* ================================
-   MEDIA QUERIES
-   ================================ */
-
-/* Large Desktop (1920px and up) */
-@media (min-width: 1920px) {
-  body {
-    gap: 28px;
-  }
-  
-  #question {
-    max-width: 600px;
-    padding: 40px 36px;
-    font-size: 1.6rem;
-  }
-  
-  input, button {
-    max-width: 600px;
-    font-size: 18px;
-    padding: 18px 24px;
-  }
-  
-  .progress {
-    max-width: 600px;
-    height: 10px;
-  }
-  
-  .button-container {
-    max-width: 600px;
-  }
-}
-
-/* Standard Desktop (1200px - 1919px) */
-@media (min-width: 1200px) and (max-width: 1919px) {
-  #question {
-    font-size: 1.45rem;
-  }
-}
-
-/* Laptop/Tablet Landscape (992px - 1199px) */
-@media (min-width: 992px) and (max-width: 1199px) {
-  #question {
-    font-size: 1.35rem;
-    padding: 30px 26px;
-  }
-  
-  input, button {
-    font-size: 16px;
-    padding: 15px 18px;
-  }
-}
-
-/* Tablet Portrait (768px - 991px) */
-@media (min-width: 768px) and (max-width: 991px) {
-  body {
-    gap: 18px;
-    padding: 24px;
-  }
-  
-  #question {
-    max-width: 480px;
-    font-size: 1.3rem;
-    padding: 28px 24px;
-  }
-  
-  input {
-    max-width: 480px;
-    font-size: 16px;
-    padding: 15px 18px;
-  }
-  
-  button {
-    max-width: 480px;
-    font-size: 16px;
-    padding: 15px 20px;
-  }
-  
-  .progress {
-    max-width: 480px;
-  }
-  
-  .button-container {
-    max-width: 480px;
-  }
-}
-
-/* Mobile Landscape (576px - 767px) */
-@media (min-width: 576px) and (max-width: 767px) {
-  body {
-    gap: 16px;
-    padding: 20px 16px;
-  }
-  
-  #question {
-    max-width: 100%;
-    font-size: 1.2rem;
-    padding: 24px 20px;
-    border-radius: 16px;
-  }
-  
-  input {
-    font-size: 16px;
-    padding: 14px 16px;
-    border-radius: 12px;
-  }
-  
-  button {
-    font-size: 15px;
-    padding: 14px 18px;
-    border-radius: 12px;
-  }
-  
-  .progress {
-    height: 6px;
-  }
-}
-
-/* Mobile Portrait (up to 575px) */
-@media (max-width: 575px) {
-  body {
-    gap: 14px;
-    padding: 16px;
-    justify-content: center;
-    min-height: 100vh;
-  }
-  
-  .progress {
-    height: 6px;
-    max-width: 100%;
-  }
-  
-  #question {
-    max-width: 100%;
-    font-size: 1.15rem;
-    padding: 22px 18px;
-    border-radius: 14px;
-    line-height: 1.4;
-  }
-  
-  input {
-    font-size: 16px;
-    padding: 13px 15px;
-    border-radius: 12px;
-    max-width: 100%;
-  }
-  
-  .button-container {
-    gap: 10px;
-    flex-direction: column-reverse;
-    max-width: 100%;
-  }
-  
-  button {
-    width: 100%;
-    font-size: 16px;
-    padding: 14px 16px;
-    border-radius: 12px;
-  }
-  
-  body.completed h2 {
-    font-size: 2rem;
-  }
-  
-  body.completed p {
-    font-size: 1rem;
-  }
-}
-
-/* Small Mobile (up to 375px) */
-@media (max-width: 375px) {
-  body {
-    padding: 16px;
-    gap: 12px;
-  }
-  
-  #question {
-    font-size: 1.05rem;
-    padding: 20px 16px;
-  }
-  
-  input {
-    font-size: 15px;
-    padding: 12px 14px;
-  }
-  
-  button {
-    font-size: 15px;
-    padding: 13px 14px;
-  }
-  
-  body.completed h2 {
-    font-size: 1.75rem;
-  }
-}
-
-/* Very Small Mobile (up to 320px) */
-@media (max-width: 320px) {
-  #question {
-    font-size: 1rem;
-    padding: 18px 14px;
-  }
-  
-  input, button {
-    font-size: 14px;
-    padding: 11px 12px;
-  }
-  
-  body.completed h2 {
-    font-size: 1.5rem;
-  }
-}
-
-/* Landscape orientation on mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-  body {
-    padding: 12px;
-    justify-content: flex-start;
-    gap: 10px;
-  }
-  
-  #question {
-    padding: 16px 20px;
-    font-size: 1.1rem;
-  }
-  
-  input, button {
-    padding: 10px 14px;
-  }
-  
-  .progress {
-    height: 5px;
-  }
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  button:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-  
-  input:focus {
-    transform: none;
-  }
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  #question {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  
-  body::before {
-    animation: none;
-  }
-  
-  .progress-bar {
-    animation: none;
-  }
-}
-
-/* Dark mode preference (already dark, but for consistency) */
-@media (prefers-color-scheme: dark) {
-  body {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #020617 100%);
-  }
-}
-
+    @media (min-width: 768px) {
+      .button-container {
+        flex-direction: row;
+      }
+    }
   </style>
 </head>
+
 <body>
-<div class="progress">
-  <div class="progress-bar" id="progressBar"></div>
-</div>
+  <div class="app" id="app">
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
 
-  <h2 id="question"></h2>
+    <h2 id="question"></h2>
 
-  <input
-    type="text"
-    id="answer"
-    placeholder="Type your answer here"
-    autofocus
-  />
+    <input
+      type="text"
+      id="answer"
+      placeholder="Type your answer here"
+    />
 
-  <div class="button-container">
-    <button id="backBtn">Back</button>
-    <button id="nextBtn">Next</button>
+    <div class="button-container">
+      <button id="backBtn">Back</button>
+      <button id="nextBtn">Next</button>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const questions = [
+      "What is your name?",
+      "What do you do?",
+      "What is your favorite tech stack?"
+    ];
+
+    let index = 0;
+    const answers = [];
+
+    const questionEl = document.getElementById("question");
+    const inputEl = document.getElementById("answer");
+    const progressBar = document.getElementById("progressBar");
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+
+    function render() {
+      questionEl.classList.add("slide-out");
+
+      setTimeout(() => {
+        questionEl.textContent = questions[index];
+        inputEl.value = answers[index] || "";
+        progressBar.style.width = `${((index + 1) / questions.length) * 100}%`;
+
+        questionEl.classList.remove("slide-out");
+        questionEl.classList.add("slide-in");
+
+        inputEl.focus();
+        scrollIntoView();
+      }, 300);
+
+      backBtn.disabled = index === 0;
+    }
+
+    function scrollIntoView() {
+      setTimeout(() => {
+        inputEl.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 300);
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (!inputEl.value.trim()) {
+        inputEl.classList.add("shake");
+        setTimeout(() => inputEl.classList.remove("shake"), 400);
+        return;
+      }
+
+      answers[index] = inputEl.value.trim();
+
+      if (index < questions.length - 1) {
+        index++;
+        render();
+      } else {
+        document.body.innerHTML = `
+          <div style="text-align:center">
+            <h2 style="font-size:2rem">All done 🎉</h2>
+            <p>Thanks for completing the form</p>
+          </div>
+        `;
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (index > 0) {
+        index--;
+        render();
+      }
+    });
+
+    render();
+  </script>
 </body>
 </html>
