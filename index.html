@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Multi-Step Questionnaire</title>
 
  
@@ -30,6 +30,9 @@ body {
   gap: 20px;
   position: relative;
   overflow-x: hidden;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Animated background effect */
@@ -129,6 +132,8 @@ input {
   position: relative;
   z-index: 1;
   font-family: inherit;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 input::placeholder {
@@ -353,9 +358,9 @@ body.completed p {
 @media (max-width: 575px) {
   body {
     gap: 14px;
-    padding: 16px 12px;
-    justify-content: flex-start;
-    padding-top: 60px;
+    padding: 16px;
+    justify-content: center;
+    min-height: 100vh;
   }
   
   .progress {
@@ -375,11 +380,13 @@ body.completed p {
     font-size: 16px;
     padding: 13px 15px;
     border-radius: 12px;
+    max-width: 100%;
   }
   
   .button-container {
     gap: 10px;
     flex-direction: column-reverse;
+    max-width: 100%;
   }
   
   button {
@@ -401,8 +408,7 @@ body.completed p {
 /* Small Mobile (up to 375px) */
 @media (max-width: 375px) {
   body {
-    padding: 12px 8px;
-    padding-top: 50px;
+    padding: 16px;
     gap: 12px;
   }
   
