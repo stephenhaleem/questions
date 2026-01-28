@@ -1,4 +1,3 @@
-
 // Supabase config 
 const SUPABASE_URL = "https://pvtnnavvbnbwaslojmas.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dG5uYXZ2Ym5id2FzbG9qbWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwODY2MzcsImV4cCI6MjA4NDY2MjYzN30.o4YSI6nx4ECI8CqTcX__94IzIL2d8tI4GsGjCtsfuTQ";
@@ -147,6 +146,7 @@ nextBtn.addEventListener("click", async () => {
       <h2>All done! 🎉</h2>
       <p>Thanks for completing the questionnaire.</p>
     `;
+    document.body.classList.add('completed');
   }
 });
 
